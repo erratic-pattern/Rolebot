@@ -4,15 +4,17 @@ use v5.10;
 use Rolebot::Bot;
 
 sub check_brackets {
-    my ($post) = @_;
-    my ($pre, $bc, $i);
+    my $post = reverse @_;
+    my $pre;
+    my $bc = 0;
+    my $i = 0;
     while (my $_ = chop $post) {
         $i++;
         $pre .= $_;
         $bc++ if $_ eq '[';
         $bc-- if $_ eq ']';
         return "Mismatched ] on column $i around: "
-          . substr $pre, -1, 4 . substr $post, 0, 4
+          . (substr $pre, -6, 6) . (substr reverse($post), 0, 6)
             if $bc < 0;
     }
     return undef;
@@ -20,19 +22,26 @@ sub check_brackets {
 
 sub interpret {
     my ($_) = @_;
-    my ($out, $p, @stack, @tape);
+    my (@stack, @tape);
+    my $out = '';
+    my $p = 0;
     $_ = reverse;
-    my ($src, $inp) = /^([^!]*)!(.*)$/;
-    while (defined (my $c = chop $src)) {
+    my $start_time = time;
+    my ($inp, $src) = /^(?:([^!]*)!)?(.*)$/;
+    while ('' ne (my $c = chop $src)) {
+        return "Time limit exceeded. Output: $out"
+          if time - $start_time >= 12;
+        return "Output limit exceeded. Output: $out"
+          if length($out) > 200;
         given ($c) {
             when ('+') { ($tape[$p] += 1) %= 256;}
             when ('-') { ($tape[$p] -= 1) %= 256;}
             when ('>') { $p++; }
-            when ('<') { $p--; }
-            when ('.') { $out .= chr $tape[p]; }
-            when (',') { my $_ = chop $inp; $tape[$p] = $_ if defined; }
+            when ('<') { $p-- if $p > 0; }
+            when ('.') { $out .= chr $tape[$p]; }
+            when (',') { $tape[$p] = ord (chop $inp);}
             when ('[') {
-                "$src[" =~ /( \] [^[\]]* | (?0) \[ )$/xp;
+                ($src.'[') =~ /( \] (?: [^[\]]* | (?0) )* \[ )$/xp;
                 if ($tape[$p]) {
                     push @stack, $src;
                 }
@@ -50,6 +59,7 @@ sub interpret {
             }
         }
     }
+    return $out;
 }
 
 
