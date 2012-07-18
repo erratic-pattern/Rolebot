@@ -1,3 +1,5 @@
+home
+homepage
 sign
 signup
 login
