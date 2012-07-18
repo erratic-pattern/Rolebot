@@ -136,7 +136,7 @@ sub parse_subcommand {
 
 sub cap(\$;$) {
     my ($s, $n, $l) = @_;
-    my @lines = map {substr $_, 0, $l // $Rolebot::Config::line_cap} split /\n+/, $$s;
+    my @lines = map {substr $_, 0, ($l // $Rolebot::Config::line_cap)} split /\n+/, $$s;
     return (defined wantarray? my $_ : $$s) = join "\n", (splice @lines, 0, $n // $Rolebot::Config::max_lines);
 }
 
@@ -408,6 +408,7 @@ sub {
     my $cmds = $self->{cmds};
     my $cmd;
     unless ($cmd = $cmds->{$cmd_name}) {
+        return if $cmd_name =~ /\W/;
         my @abbrevs;
         my %close;
         for(keys %$cmds) {
