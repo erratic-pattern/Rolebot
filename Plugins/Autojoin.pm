@@ -4,7 +4,7 @@ use strict; use warnings;
 use v5.10;
 
 
-our $auto_rejoin_time = 3;
+our $auto_rejoin_time = 5;
 
 sub kicked {
     my ($self, $a) = @_;
