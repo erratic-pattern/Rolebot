@@ -29,7 +29,7 @@ sub {
         my $link = ${^MATCH};
         $link = "http://" . $link if $link =~ /^www/;
         my $res = get_url($link);
-        my $cont_length = $res->header("Content-Length");
+        my $cont_length = $res->header("Content-Length") // 0;
         if ($res->header("Content-Type") =~ 'text/html'
             && $cont_length < 250000000
             && $res->decoded_content
