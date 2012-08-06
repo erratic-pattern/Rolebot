@@ -33,7 +33,7 @@ sub {
     $shell_cmd .=' | head -n 2' if $a->{channel} ne 'msg';
     my $out = qx($shell_cmd);
     eval {
-        substr($out, $Rolebot::Config::line_cap-3) = "...";
+        substr($out, $Rolebot::Config::line_cap-4) = "...";
     };
     return (body => $out);
 };

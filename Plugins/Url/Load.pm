@@ -29,8 +29,9 @@ sub {
         my $link = ${^MATCH};
         $link = "http://" . $link if $link =~ /^www/;
         my $res = get_url($link);
+        my $cont_length = $res->header("Content-Length");
         if ($res->header("Content-Type") =~ 'text/html'
-            && $res->header("Content-Length") < 250000000
+            && $cont_length < 250000000
             && $res->decoded_content
                =~ m{<title>(.*?)</title>}si) {
             my $title = HTML::Entities::decode($1);

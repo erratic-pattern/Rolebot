@@ -82,7 +82,7 @@ sub interpret {
 }
 
 
-command bf => 'bf <program>[!<input>] -- execute a brainfuck program with optional input. Use the # command to print out a section of the tape for debugging.',
+command bf => Languages => 'bf <program>[!<input>] -- execute a brainfuck program with optional input. Use the # command to print out a section of the tape for debugging.',
 sub {
     my ($self, $args) = @_;
     my $src = trim $args->{body};

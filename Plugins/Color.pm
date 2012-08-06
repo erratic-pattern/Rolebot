@@ -11,5 +11,5 @@ sub can_use_color {
 
 sub msg_filter {
     my ($self, $a) = @_;
-    $a->{body} =~ s/\x{3}\d{1,2}|[\x{F}\x{2}\26\37]//g unless can_use_color($self, $a->{channel});
+    $a->{body} =~ s/\x{3}\d{1,2}(,\d{1,2})?|[\x{F}\x{2}\26\37]//g unless can_use_color($self, $a->{channel});
 }

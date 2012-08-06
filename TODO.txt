@@ -2,3 +2,9 @@
 --make generic diceroller
 --make GURPs diceroller
 --make DnD diceroller
+
+--nested config file format specifies channel based support
+
+--plugin metadata format
+
+--proper installation script. reorganize directory structure

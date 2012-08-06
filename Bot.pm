@@ -18,6 +18,7 @@ use HTTP::Request ();
 use Tie::Persistent;
 use Data::Dumper 'Dumper';
 use Storable 'dclone';
+use Text::Wrap;
 $Storable::Deparse = 'true';
 $Storable::Eval = 'true';
 BEGIN {
@@ -136,12 +137,16 @@ sub parse_subcommand {
 
 sub cap(\$;$) {
     my ($s, $n, $l) = @_;
-    my @lines = map {substr $_, 0, ($l // $Rolebot::Config::line_cap)} split /\n+/, $$s;
-    return (defined wantarray? my $_ : $$s) = join "\n", (splice @lines, 0, $n // $Rolebot::Config::max_lines);
+    local $Text::Wrap::columns = $l // $Rolebot::Config::line_cap;
+    my @lines = split /\n+/, Text::Wrap::wrap('', '', $$s);
+    return (defined wantarray? my $_ : $$s) =
+      join "\n", (splice @lines, 0, ($n // $Rolebot::Config::max_lines));
 }
 
 sub get_url(_) {
-    state $ua = LWP::UserAgent->new(agent => $Rolebot::Config::useragent);
+    my $ua = LWP::UserAgent->new(agent => $Rolebot::Config::user_agent,
+                                 max_size => $Rolebot::Config::dl_max_size,
+                                 timeout => $Rolebot::Config::dl_timeout);
     return $ua->request(HTTP::Request->new('GET', shift));
 }
 
@@ -336,6 +341,7 @@ sub say {
         $args = {@_};
     }
     $self->call_plugins_no_say("msg_filter", $args);
+    cap $args->{body} unless $args->{channel} eq "msg";
     return $self->SUPER::say($args);
 }
 
@@ -349,6 +355,7 @@ sub said {
         $self->registered_nicks->{lc $nick} = 0;
     }
     $self->call_plugins('said', $args);
+    return unless %$args;
     my $filters = $self->{filters};
     for(keys %$filters) {
         my %default_msg_info = (who=>$nick, channel=>$args->{channel});
@@ -364,7 +371,6 @@ sub said {
             warn $@ if $@;
             %msg_info = @result? @result : ();
             if ($msg_info{body}) {
-                cap $msg_info{body} unless $args->{channel} eq "msg";
                 $self->say(%default_msg_info, %msg_info);
             }
         }
@@ -480,6 +486,8 @@ sub {
     my $msg;
     #handle specific queries
     if ($query) {
+        $self->call_plugins('help_query', $arg);
+        return if $arg->{found};
         my $cmd = $cmds->{$query};
         $msg = $cmd->{help} if $cmd;
         unless($msg) {
