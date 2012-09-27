@@ -350,6 +350,10 @@ sub said {
     my ($self,$args) = @_;
     my $nick = $args->{who};
     return if $self->ignore_nick($nick);
+    if ($args->{channel} eq 'msg') {
+        say "privmsg from " . $args->{who} . ': ' . $args->{body};
+        return if $self->{lock_pm};
+    }
     unless (defined $self->registered_nicks->{lc $nick}) {
         $self->whois($nick);
         $self->registered_nicks->{lc $nick} = 0;
@@ -524,6 +528,14 @@ sub {
     return (body => $msg);
 };
 
+
+command lockpm => Admin => 'Usage: lockpm -- makes gurobot ignore all privmsgs',
+sub {
+    my ($self, $args) = @_;
+    return (body => "Nope.") unless $self->is_admin($args->{who});
+    return (body => ($self->{lock_pm} = not $self->{lock_pm})
+            ? "PMs locked." : "PMs unlocked");
+};
 
 command system => RP => 'Usage: system [<system name>] -- switches the dice roller to another system',
 sub {

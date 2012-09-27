@@ -29,7 +29,7 @@ filter $parse_haskell,
 sub {
     my ($self, $a, $expr) = @_;
     set_temp $expr;
-    my $shell_cmd  = qq{mueval -t 7 $extensions -e "`cat $temp_name`" 2>&1};
+    my $shell_cmd  = qq{mueval -t 10 $extensions -e "`cat $temp_name`" 2>&1};
     $shell_cmd .=' | head -n 2' if $a->{channel} ne 'msg';
     my $out = qx($shell_cmd);
     eval {
