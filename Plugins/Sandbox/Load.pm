@@ -196,7 +196,7 @@ sub {
     my $nick = $args->{who};
     local $CWD = $home;
     my $cmd_out;
-    my $pid = open3(undef, $cmd_out, $cmd_out, "git revert --strategy=resolve -- $refs");
+    my $pid = open3(undef, $cmd_out, $cmd_out, "git revert --strategy=recursive -Xours -Xpatience -- $refs");
     waitpid($pid, 0);
     my $out;
     {
